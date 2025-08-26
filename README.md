@@ -109,3 +109,206 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 1. Вопросы вида «Ничего не работает. Не запускается. Всё сломалось». Дипломный руководитель не сможет ответить на такой вопрос без дополнительных уточнений. Цените своё время и время других.
 2. Откладывание выполнения дипломной работы на последний момент.
 3. Ожидание моментального ответа на свой вопрос. Дипломные руководители — работающие инженеры, которые занимаются, кроме преподавания, своими проектами. Их время ограничено, поэтому постарайтесь задавать правильные вопросы, чтобы получать быстрые ответы :)
+
+## Решение
+
+### Создание инфраструктуры
+
+Для создания ифраструктуры использую Terraform.
+Одновременно с созданием вируальных машин создаю VPC, Application Load Balanser и группы безопасности.
+
+Terraform
+![TerraformPlan](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/TerraformPlan.jpg)
+
+VPC
+![VPC](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/VPC.jpg)
+
+Application Load Balanser
+![ALB](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ALB.jpg)
+
+Health check
+![ALB2](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ALB2.jpg)
+
+ALB map
+![ALB3](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ALB3.jpg)
+
+Созданные виртуальные машины
+![VM](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/VM.jpg)
+
+
+### Ansible
+Запуск Ansible произвожу на своей локальной машине.
+Для каждой задачи создан свой плейбук.
+
+Проверка доступности машин.
+![ansible-ping](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ansible-ping.jpg)
+
+### Сайт
+После деплоя данных на VM web1 и web2 проверяем их работу через балансировщик: http://130.193.58.35
+
+web1
+![web1](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/web1.jpg)
+
+web2
+![web2](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/web2.jpg)
+
+### Мониторинг
+
+### ZAbbix Server
+
+Установка ZAbbix Server
+![ZabbixServer](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ZabbixServer.jpg.jpg)
+
+Установка ZAbbix Agents
+![ZabbixAgent](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ZabbixAgent.jpg)
+
+Сервер Zabbix доступен по адресу: http://158.160.116.65
+
+Hosts
+![Hosts](https://github.com/vonoid/Diplom-sys/blob/b9e3d0835e5c1f9e54eddc659f2ac28896230896/image/ZabbixServerHosts.jpg)
+
+Dashboard с создвнными tresholds
+![ZabbixServerDash1](https://github.com/vonoid/Diplom-sys/blob/b9e3d0835e5c1f9e54eddc659f2ac28896230896/image/ZabbixServerDash1.jpg)
+![ZabbixServerDash2](https://github.com/vonoid/Diplom-sys/blob/b9e3d0835e5c1f9e54eddc659f2ac28896230896/image/ZabbixServerDash12.jpg)
+
+### Логи
+
+Установка Kibana через dpkg
+![KibanaInstal](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/KibanaInstal.jpg)
+
+Установка Filebeat
+![filebeat](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/filebeat.jpg)
+
+Проверка Filebeat c VM web1
+![test out filebit from web1](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/test out filebit from web1.jpg)
+
+Проверка Filebeat c VM web2
+![test out filebit from web2](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/test out filebit from web2.jpg)
+
+Установка Elasticsearch
+![elk](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/elk.jpg)
+
+Проверка Elasticsearch
+http://89.169.159.96:5601/
+![Elastik(https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/Elastik.jpg)
+
+### Безопастность
+
+Группы безопасности
+![security-groups(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groups.jpg)
+
+Примеры настроек
+![security-groupsELK(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groupsELK.jpg)
+![security-groupsWEB(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groupsWEB.jpg)
+
+Резервное копирование
+Создайте snapshot дисков всех ВМ по расписанию с временем жизни 7 дней
+![snapshot-schedule(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/snapshot-schedule.jpg)
+
+
+Итоговая структура проекта:
+
+```
+ivan@ubuntu:~/diplom-infra$ tree
+.
+├── ansible
+│   ├── ansible.cfg
+│   ├── check-filebeat.yml
+│   ├── elk-setup.yml
+│   ├── filebeat-playbook.yml
+│   ├── inventory
+│   │   └── webservers.yml
+│   ├── kibana-setup.yml
+│   ├── roles
+│   │   ├── elasticsearch
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── tasks
+│   │   │   │   └── main.yml
+│   │   │   └── templates
+│   │   │       └── elasticsearch.yml.j2
+│   │   ├── filebeat
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── tasks
+│   │   │   │   ├── configure-filebeat.yml
+│   │   │   │   ├── main.yml
+│   │   │   │   └── main.yml.backup
+│   │   │   └── templates
+│   │   │       └── filebeat.yml.j2
+│   │   ├── kibana
+│   │   │   ├── files
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── tasks
+│   │   │   │   └── main.yml
+│   │   │   └── templates
+│   │   │       └── kibana.yml.j2
+│   │   ├── nginx
+│   │   │   ├── handlers
+│   │   │   │   └── main.yml
+│   │   │   ├── tasks
+│   │   │   │   └── main.yml
+│   │   │   └── templates
+│   │   │       ├── index.html.j2
+│   │   │       └── nginx.conf.j2
+│   │   ├── zabbix-agent
+│   │   │   ├── tasks
+│   │   │   │   └── main.yml
+│   │   │   └── templates
+│   │   │       └── zabbix_agent2.conf.j2
+│   │   └── zabbix-server
+│   │       ├── handlers
+│   │       │   └── main.yml
+│   │       ├── tasks
+│   │       │   └── main.yml
+│   │       └── templates
+│   │           ├── nginx.conf.j2
+│   │           └── zabbix_server.conf.j2
+│   ├── site.yml
+│   ├── zabbix-agents.yml
+│   └── zabbix.yml
+├── backup
+│   └── ansible
+│       ├── ansible.cfg
+│       ├── inventory
+│       │   └── webservers.yml
+│       ├── roles
+│       │   └── nginx
+│       │       ├── handlers
+│       │       │   └── main.yml
+│       │       ├── tasks
+│       │       │   └── main.yml
+│       │       └── templates
+│       │           ├── index.html.j2
+│       │           └── nginx.conf.j2
+│       └── site.yml
+├── key.json
+└── terraform
+    ├── bastion.tf
+    ├── data.tf
+    ├── loadbalancer.tf
+    ├── monitoring.tf
+    ├── private_subnets.tf
+    ├── provider.tf
+    ├── security_groups.tf
+    ├── terraform.tfstate
+    ├── terraform.tfstate.1755936947.backup
+    ├── terraform.tfstate.1755937520.backup
+    ├── terraform.tfstate.1755950988.backup
+    ├── terraform.tfstate.1755964646.backup
+    ├── terraform.tfstate.1755964647.backup
+    ├── terraform.tfstate.backup
+    ├── vpc.tf
+    └── web.tf
+
+39 directories, 54 files
+
+
+```
+
+
+
+
