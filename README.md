@@ -157,7 +157,7 @@ web2
 ### ZAbbix Server
 
 Установка ZAbbix Server
-![ZabbixServer](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ZabbixServer.jpg.jpg)
+![ZabbixServer](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ZabbixServer.jpg)
 
 Установка ZAbbix Agents
 ![ZabbixAgent](https://github.com/vonoid/Diplom-sys/blob/9c3b2f4466f4ef66eafe2b4d038c4586f2611e36/image/ZabbixAgent.jpg)
@@ -169,7 +169,7 @@ Hosts
 
 Dashboard с создвнными tresholds
 ![ZabbixServerDash1](https://github.com/vonoid/Diplom-sys/blob/b9e3d0835e5c1f9e54eddc659f2ac28896230896/image/ZabbixServerDash1.jpg)
-![ZabbixServerDash2](https://github.com/vonoid/Diplom-sys/blob/b9e3d0835e5c1f9e54eddc659f2ac28896230896/image/ZabbixServerDash12.jpg)
+![ZabbixServerDash2](https://github.com/vonoid/Diplom-sys/blob/b9e3d0835e5c1f9e54eddc659f2ac28896230896/image/ZabbixServerDash2.jpg)
 
 ### Логи
 
@@ -180,30 +180,31 @@ Dashboard с создвнными tresholds
 ![filebeat](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/filebeat.jpg)
 
 Проверка Filebeat c VM web1
-![test out filebit from web1](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/test out filebit from web1.jpg)
+![test out filebit from web1](https://github.com/vonoid/Diplom-sys/blob/99abe1718d23c34b87d618fc16ee3b1015272bec/image/test-out-filebit-from-web1.jpg)
 
 Проверка Filebeat c VM web2
-![test out filebit from web2](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/test out filebit from web2.jpg)
+![test out filebit from web2](https://github.com/vonoid/Diplom-sys/blob/99abe1718d23c34b87d618fc16ee3b1015272bec/image/test-out-filebit-from-web2.jpg)
 
 Установка Elasticsearch
 ![elk](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/elk.jpg)
 
 Проверка Elasticsearch
-http://89.169.159.96:5601/
-![Elastik(https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/Elastik.jpg)
+http://89.169.159.96:5601
+
+![Elastik](https://github.com/vonoid/Diplom-sys/blob/3209966ef9dc934e7bec376a27ed427537053c7a/image/Elastik.jpg)
 
 ### Безопастность
 
 Группы безопасности
-![security-groups(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groups.jpg)
+![security-groups](https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groups.jpg)
 
 Примеры настроек
-![security-groupsELK(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groupsELK.jpg)
-![security-groupsWEB(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groupsWEB.jpg)
+![security-groupsELK](https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groupsELK.jpg)
+![security-groupsWEB](https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/security-groupsWEB.jpg)
 
 Резервное копирование
 Создайте snapshot дисков всех ВМ по расписанию с временем жизни 7 дней
-![snapshot-schedule(https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/snapshot-schedule.jpg)
+![snapshot-schedule](https://github.com/vonoid/Diplom-sys/blob/3f16679a56f496a066cf182b3dc9b0612f910627/image/snapshot-schedule.jpg)
 
 
 Итоговая структура проекта:
