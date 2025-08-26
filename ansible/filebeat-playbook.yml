@@ -1,0 +1,34 @@
+---
+- name: Install and configure Filebeat
+  hosts: webservers
+  become: true
+
+  vars:
+    elastic_host: "elasticsearch.ru-central1.internal"
+    elastic_user: "elastic"
+    elastic_pass: "ПарольОтElasticsearch"
+
+  tasks:
+    - name: Download Filebeat .deb
+      get_url:
+        url: "https://repo.huaweicloud.com/filebeat/8.17.4/filebeat-8.17.4-amd64.deb"
+        dest: "/tmp/filebeat.deb"
+
+    - name: Install Filebeat
+      apt:
+        deb: "/tmp/filebeat.deb"
+        state: present
+
+    - name: Deploy Filebeat config
+      template:
+        src: "roles/filebeat/templates/filebeat.yml.j2"
+        dest: "/etc/filebeat/filebeat.yml"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Enable and start Filebeat
+      systemd:
+        name: filebeat
+        enabled: yes
+        state: restarted

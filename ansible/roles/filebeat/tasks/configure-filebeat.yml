@@ -1,0 +1,73 @@
+---
+- name: Ensure Filebeat is stopped before configuration
+  systemd:
+    name: filebeat
+    state: stopped
+    enabled: no
+
+- name: Create Filebeat configuration
+  copy:
+    content: |
+      # Filebeat configuration
+      filebeat.inputs:
+      - type: filestream
+        id: nginx-access
+        enabled: true
+        paths:
+          - /var/log/nginx/access.log
+        fields:
+          log_type: nginx-access
+        fields_under_root: true
+
+      - type: filestream
+        id: nginx-error
+        enabled: true
+        paths:
+          - /var/log/nginx/error.log
+        fields:
+          log_type: nginx-error
+        fields_under_root: true
+
+      output.elasticsearch:
+        hosts: ["http://elasticsearch.ru-central1.internal:9200"]
+        indices:
+          - index: "nginx-access-%{+yyyy.MM.dd}"
+            when.equals:
+              log_type: "nginx-access"
+          - index: "nginx-error-%{+yyyy.MM.dd}"
+            when.equals:
+              log_type: "nginx-error"
+
+      logging.level: info
+      logging.to_files: true
+      logging.files:
+        path: /var/log/filebeat
+        name: filebeat
+        keepfiles: 7
+        permissions: 0644
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: '0640'
+  notify: restart filebeat
+
+- name: Ensure log directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /var/log/filebeat
+
+- name: Start and enable Filebeat
+  systemd:
+    name: filebeat
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Wait for Filebeat to start
+  pause:
+    seconds: 5

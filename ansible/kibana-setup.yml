@@ -1,0 +1,62 @@
+---
+- name: Setup Kibana 7.9.3 from Huawei Mirror
+  hosts: kibana.ru-central1.internal
+  become: yes
+  vars:
+    es_version: "7.9.3"
+  
+  tasks:
+    - name: Check current Kibana installation
+      shell: |
+        if which kibana >/dev/null 2>&1; then
+          kibana --version
+        else
+          echo "Not installed"
+        fi
+      register: current_kibana
+      changed_when: false
+
+    - name: Remove existing Kibana if different version
+      apt:
+        name: kibana
+        state: absent
+        purge: yes
+      when: "'7.9.3' not in current_kibana.stdout"
+
+    - include_role:
+        name: kibana
+
+- name: Verify Kibana installation
+  hosts: kibana.ru-central1.internal
+  tasks:
+    - name: Check Kibana service status
+      systemd:
+        name: kibana
+      register: kibana_status
+
+    - name: Check Kibana version
+      shell: |
+        /usr/share/kibana/bin/kibana --version 2>/dev/null || echo "Version check failed"
+      register: kibana_version
+
+    - name: Check Kibana logs
+      shell: |
+        sudo tail -15 /var/log/kibana/kibana.log 2>/dev/null || echo "No logs found"
+      register: kibana_logs
+
+    - name: Check listening ports
+      shell: |
+        netstat -tlnp | grep :5601 || ss -tlnp | grep :5601 || echo "Port 5601 not found"
+      register: kibana_port
+
+    - name: Show installation results
+      debug:
+        msg: |
+          === Kibana Installation Summary ===
+          Host: {{ inventory_hostname }}
+          Status: {{ kibana_status.state }}
+          Version: {{ kibana_version.stdout | trim }}
+          Port: {{ kibana_port.stdout | trim }}
+          
+          Last logs:
+          {{ kibana_logs.stdout | trim }}

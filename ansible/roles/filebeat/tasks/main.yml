@@ -1,0 +1,74 @@
+---
+- name: Install required dependencies
+  apt:
+    name:
+      - curl
+      - wget
+    state: present
+
+- name: Download Filebeat .deb package
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.11.1-amd64.deb"
+    dest: /tmp/filebeat.deb
+    mode: '0644'
+
+- name: Install Filebeat from .deb package
+  apt:
+    deb: /tmp/filebeat.deb
+    state: present
+
+- name: Clean up package
+  file:
+    path: /tmp/filebeat.deb
+    state: absent
+
+- name: Configure Filebeat
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: '0640'
+  notify: restart filebeat
+
+- name: Enable nginx module
+  command:
+    cmd: filebeat modules enable nginx
+    chdir: /etc/filebeat
+  notify: restart filebeat
+
+- name: Configure nginx module
+  copy:
+    content: |
+      # Module: nginx
+      # Docs: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-nginx.html
+
+      - module: nginx
+        access:
+          enabled: true
+          var.paths: ["/var/log/nginx/access.log*"]
+        error:
+          enabled: true
+          var.paths: ["/var/log/nginx/error.log*"]
+    dest: /etc/filebeat/modules.d/nginx.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart filebeat
+
+- name: Start and enable Filebeat
+  systemd:
+    name: filebeat
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Check Filebeat status
+  command: filebeat test output
+  register: filebeat_test
+  changed_when: filebeat_test.rc == 0
+  ignore_errors: yes
+
+- name: Show Filebeat test result
+  debug:
+    msg: "Filebeat connection test: {{ 'SUCCESS' if filebeat_test.rc == 0 else 'FAILED' }}"

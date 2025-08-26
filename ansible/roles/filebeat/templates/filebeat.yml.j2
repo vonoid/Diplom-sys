@@ -1,0 +1,10 @@
+filebeat.inputs:
+  - type: log
+    paths:
+      - /var/log/syslog
+      - /var/log/auth.log
+
+output.elasticsearch:
+  hosts: ["{{ elastic_host }}:9200"]
+  username: "{{ elastic_user }}"
+  password: "{{ elastic_pass }}"

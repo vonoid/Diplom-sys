@@ -1,0 +1,19 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    root /var/www/html;
+    
+    # Добавляем кодировку UTF-8
+    charset utf-8;
+    
+    # Добавляем правильные заголовки
+    add_header Content-Type "text/html; charset=utf-8";
+    
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+}

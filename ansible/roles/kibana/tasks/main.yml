@@ -1,0 +1,134 @@
+---
+- name: Install dependencies
+  apt:
+    name:
+      - curl
+      - wget
+      - libnss3
+      - libatk-bridge2.0-0
+      - libatk1.0-0
+      - libcairo2
+      - libcups2
+      - libdrm2
+      - libgbm1
+      - libgtk-3-0
+      - libx11-xcb1
+      - libxcomposite1
+      - libxdamage1
+      - libxrandr2
+    state: present
+    update_cache: yes
+
+- name: Download Kibana .deb package from Huawei Mirror
+  get_url:
+    url: "https://mirrors.huaweicloud.com/kibana/7.9.3/kibana-7.9.3-amd64.deb"
+    dest: /tmp/kibana.deb
+    mode: '0644'
+    timeout: 60
+  register: download_kibana
+  until: download_kibana is succeeded
+  retries: 3
+  delay: 10
+
+- name: Install Kibana from .deb package
+  apt:
+    deb: /tmp/kibana.deb
+    state: present
+    install_recommends: yes
+
+- name: Clean up package
+  file:
+    path: /tmp/kibana.deb
+    state: absent
+
+- name: Configure Kibana for Elasticsearch 7.x
+  copy:
+    content: |
+      # Kibana server port
+      server.port: 5601
+
+      # Kibana server host
+      server.host: "0.0.0.0"
+
+      # Elasticsearch connection
+      elasticsearch.hosts: ["http://elasticsearch.ru-central1.internal:9200"]
+
+      # Kibana index
+      kibana.index: ".kibana"
+
+      # Default locale
+      i18n.locale: "en"
+
+      # Security (disable for development)
+      xpack.security.enabled: false
+      xpack.fleet.enabled: false
+
+      # Monitoring
+      monitoring.ui.elasticsearch.enabled: true
+      monitoring.kibana.collection.enabled: true
+    dest: /etc/kibana/kibana.yml
+    owner: kibana
+    group: kibana
+    mode: '0640'
+  notify: restart kibana
+
+- name: Ensure Kibana directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: kibana
+    group: kibana
+    mode: '0755'
+  loop:
+    - /etc/kibana
+    - /var/lib/kibana
+    - /var/log/kibana
+
+- name: Fix permissions on Kibana directories
+  file:
+    path: "{{ item }}"
+    owner: kibana
+    group: kibana
+    mode: '0755'
+    recurse: yes
+  loop:
+    - /usr/share/kibana
+    - /var/lib/kibana
+    - /var/log/kibana
+
+- name: Start and enable Kibana
+  systemd:
+    name: kibana
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Wait for Kibana to start
+  wait_for:
+    port: 5601
+    host: "{{ ansible_default_ipv4.address }}"
+    delay: 15
+    timeout: 300
+
+- name: Check Kibana status
+  shell: |
+    # Wait a bit longer for Kibana to initialize
+    sleep 20
+    curl -s -o /dev/null -w "%{http_code}" http://localhost:5601/api/status || echo "500"
+  register: kibana_status
+  until: kibana_status.stdout == "200"
+  retries: 10
+  delay: 10
+
+- name: Verify Kibana API
+  shell: |
+    curl -s http://localhost:5601/api/status | grep -o '"overall":{"state":"[^"]*"}' || echo "Not ready"
+  register: kibana_api
+
+- name: Show Kibana installation status
+  debug:
+    msg: |
+      Kibana installation completed!
+      Status: {{ kibana_status.stdout }}
+      API: {{ kibana_api.stdout }}
+      Access URL: http://{{ ansible_default_ipv4.address }}:5601

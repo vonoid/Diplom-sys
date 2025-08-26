@@ -1,0 +1,71 @@
+---
+all:
+  children:
+    bastion:
+      hosts:
+        bastion.ru-central1.internal:
+          ansible_host: 51.250.75.130
+          ansible_user: ubuntu
+
+    webservers:
+      hosts:
+        web1.ru-central1.internal:
+          ansible_host: web1.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        web2.ru-central1.internal:
+          ansible_host: web2.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+
+    monitoring:
+      hosts:
+        zabbix.ru-central1.internal:
+          ansible_host: 158.160.53.35
+          ansible_user: ubuntu
+
+    logging:
+      hosts:
+        elasticsearch.ru-central1.internal:
+          ansible_host: elasticsearch.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        kibana.ru-central1.internal:
+          ansible_host: 89.169.159.96
+          ansible_user: ubuntu
+
+    zabbix_agents:
+      hosts:
+        web1.ru-central1.internal:
+          ansible_host: web1.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        web2.ru-central1.internal:
+          ansible_host: web2.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        bastion.ru-central1.internal:
+          ansible_host: bastion.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        elasticsearch.ru-central1.internal:
+          ansible_host: elasticsearch.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        kibana.ru-central1.internal:
+          ansible_host: kibana.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"
+        zabbix.ru-central1.internal:
+          ansible_host: zabbix.ru-central1.internal
+          ansible_user: ubuntu
+          ansible_ssh_common_args: >
+            -o ProxyCommand="ssh -W %h:%p -q ubuntu@51.250.75.130"

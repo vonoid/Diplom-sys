@@ -1,0 +1,67 @@
+---
+- name: Check Filebeat configuration and status
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Check Filebeat service status
+      systemd:
+        name: filebeat
+      register: filebeat_status
+
+    - name: Check Filebeat configuration
+      command: filebeat test config -c /etc/filebeat/filebeat.yml
+      register: config_test
+      changed_when: false
+
+    - name: Check Elasticsearch output
+      command: filebeat test output -c /etc/filebeat/filebeat.yml
+      register: output_test
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Check Filebeat logs
+      shell: |
+        sudo tail -20 /var/log/filebeat/filebeat 2>/dev/null || echo "No logs found"
+      register: filebeat_logs
+
+    - name: Show Nginx log files
+      shell: |
+        echo "Nginx log files:"
+        ls -la /var/log/nginx/
+        echo "Access log tail:"
+        sudo tail -3 /var/log/nginx/access.log 2>/dev/null || echo "No access log"
+        echo "Error log tail:"
+        sudo tail -3 /var/log/nginx/error.log 2>/dev/null || echo "No error log"
+      register: nginx_logs
+
+    - name: Display status information
+      debug:
+        msg: |
+          === {{ inventory_hostname }} ===
+          Filebeat status: {{ filebeat_status.state }}
+          Config test: {{ 'PASS' if config_test.rc == 0 else 'FAIL' }}
+          Output test: {{ 'PASS' if output_test.rc == 0 else 'FAIL' }}
+          Log files present: {{ nginx_logs.stdout | trim | length > 0 }}
+          
+          Last log messages:
+          {{ filebeat_logs.stdout | trim }}
+
+    - name: Generate test traffic to create logs
+      shell: |
+        # Generate some test requests to create logs
+        curl -s http://localhost/ >/dev/null
+        curl -s http://localhost/nonexistent >/dev/null 2>&1
+        echo "Generated test requests"
+      changed_when: false
+
+    - name: Check if logs are being read
+      shell: |
+        # Check if Filebeat is reading the logs
+        sudo filebeat stats | grep -E "(nginx|log)"
+      register: filebeat_stats
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Show Filebeat stats
+      debug:
+        msg: "Filebeat stats: {{ filebeat_stats.stdout | default('No stats available') }}"

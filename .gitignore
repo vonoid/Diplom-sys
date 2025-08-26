@@ -1,0 +1,22 @@
+# Игнорировать ключи и секреты Yandex Cloud
+key.json
+*.json
+
+# Игнорировать state-файлы и кэш Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+
+# Игнорировать резервные копии (опционально)
+backup/
+
+# Игнорировать файлы IDE, например, если используете VSCode
+.vscode/
+
+# Игнорировать служебные файлы Ansible
+ansible/*.retry
+ansible/.vault-password.txt
+
+# Игнорировать логи
+*.log

@@ -1,0 +1,121 @@
+---
+- name: Install and configure Zabbix Agent 2 on all hosts
+  hosts: all
+  become: yes
+  vars:
+    zabbix_server: "zabbix.ru-central1.internal"
+  
+  tasks:
+    - name: Check if this is Zabbix server
+      set_fact:
+        is_zabbix_server: "{{ 'zabbix' in inventory_hostname }}"
+      changed_when: false
+
+    - name: Check if Zabbix Agent is already installed (non-zabbix hosts)
+      stat:
+        path: /usr/sbin/zabbix_agent2
+      register: zabbix_agent_installed
+      changed_when: false
+      when: not is_zabbix_server
+
+    - name: Add Zabbix repository key (non-zabbix hosts)
+      apt_key:
+        url: https://repo.zabbix.com/zabbix-official-repo.key
+        state: present
+      when: not is_zabbix_server
+
+    - name: Add Zabbix repository (non-zabbix hosts)
+      apt_repository:
+        repo: "deb https://repo.zabbix.com/zabbix/6.4/ubuntu {{ ansible_distribution_release }} main"
+        state: present
+        filename: zabbix
+      when: not is_zabbix_server
+
+    - name: Install Zabbix Agent 2 (non-zabbix hosts)
+      apt:
+        name: zabbix-agent2
+        state: present
+        update_cache: yes
+      when: not is_zabbix_server
+      notify: restart zabbix-agent
+
+    - name: Ensure /etc/zabbix directory exists (non-zabbix hosts)
+      file:
+        path: /etc/zabbix
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      when: not is_zabbix_server
+
+    - name: Get current server configuration (non-zabbix hosts)
+      shell: |
+        if [ -f /etc/zabbix/zabbix_agent2.conf ]; then
+          grep -oP '^Server=\K[^#]*' /etc/zabbix/zabbix_agent2.conf | tr -d ' ' || echo "NOT_SET"
+        else
+          echo "NOT_SET"
+        fi
+      register: current_zabbix_server
+      changed_when: false
+      when: not is_zabbix_server
+
+    - name: Create minimal Zabbix Agent configuration (non-zabbix hosts)
+      template:
+        src: roles/zabbix-agent/templates/zabbix_agent2.conf.j2
+        dest: /etc/zabbix/zabbix_agent2.conf
+        owner: zabbix
+        group: zabbix
+        mode: '0644'
+      when: not is_zabbix_server
+      notify: restart zabbix-agent
+
+    - name: Ensure Zabbix Agent is enabled and started (non-zabbix hosts)
+      systemd:
+        name: zabbix-agent2
+        state: started
+        enabled: yes
+        daemon_reload: yes
+      when: not is_zabbix_server
+
+    - name: Check Zabbix Agent port is listening (non-zabbix hosts)
+      wait_for:
+        port: 10050
+        host: "{{ ansible_default_ipv4.address }}"
+        delay: 2
+        timeout: 10
+      when: not is_zabbix_server
+
+  handlers:
+    - name: restart zabbix-agent
+      service:
+        name: zabbix-agent2
+        state: restarted
+
+- name: Verify Zabbix Agents installation
+  hosts: all
+  tasks:
+    - name: Check if this is Zabbix server
+      set_fact:
+        is_zabbix_server: "{{ 'zabbix' in inventory_hostname }}"
+      changed_when: false
+
+    - name: Check Zabbix Agent service status (non-zabbix hosts)
+      command: systemctl is-active zabbix-agent2
+      register: agent_status
+      changed_when: false
+      when: not is_zabbix_server
+      ignore_errors: yes
+
+    - name: Show installation summary for agents
+      debug:
+        msg: |
+          Host: {{ inventory_hostname }}
+          Zabbix Agent: {{ 'Installed' if agent_status.rc == 0 else 'Not installed' }}
+          Service status: {{ agent_status.stdout }}
+          IP address: {{ ansible_default_ipv4.address }}
+      when: not is_zabbix_server
+
+    - name: Show Zabbix server info
+      debug:
+        msg: "Host: {{ inventory_hostname }} - Zabbix Server (no agent needed)"
+      when: is_zabbix_server

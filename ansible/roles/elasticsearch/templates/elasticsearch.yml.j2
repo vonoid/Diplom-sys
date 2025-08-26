@@ -1,0 +1,19 @@
+# Cluster name
+cluster.name: diplom-cluster
+
+# Node name
+node.name: "{{ ansible_hostname }}"
+
+# Network settings
+network.host: 0.0.0.0
+http.port: 9200
+
+# Discovery settings
+discovery.type: single-node
+
+# Paths
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+# Security (basic for now)
+xpack.security.enabled: false

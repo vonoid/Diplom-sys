@@ -1,0 +1,16 @@
+---
+- name: Install Zabbix Server
+  hosts: monitoring
+  become: yes
+  vars:
+    mysql_zabbix_password: "ZabbixSecure123!"
+  roles:
+    - zabbix-server
+
+- name: Install Zabbix Agents
+  hosts: zabbix_agents
+  become: yes
+  vars:
+    zabbix_server_ip: "158.160.53.35"
+  roles:
+    - zabbix-agent

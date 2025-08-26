@@ -1,0 +1,22 @@
+# Kibana server port
+server.port: 5601
+
+# Kibana server host
+server.host: "0.0.0.0"
+
+# Elasticsearch connection
+elasticsearch.hosts: ["http://elasticsearch.ru-central1.internal:9200"]
+
+# Kibana index
+kibana.index: ".kibana"
+
+# Default locale
+i18n.locale: "en"
+
+# Security (disable for development)
+xpack.security.enabled: false
+xpack.fleet.enabled: false
+xpack.encryptedSavedObjects.encryptionKey: "something_super_secret_change_me"
+
+# Monitoring
+monitoring.ui.container.elasticsearch.enabled: true
